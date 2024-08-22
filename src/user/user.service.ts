@@ -13,21 +13,20 @@ export class UserService {
     return user;
   }
 
-  async getById(id: number) {
-    const user = await this.userRepository.findByPk(id);
+  async findOne(id: number) {
+    const user = await this.userRepository.findByPk(id, {
+      attributes: { exclude: ['created_at', 'updated_at', 'password'] },
+    });
 
     return user;
   }
 
-  async findOne(nickname?: string, email?: string) {
-    if(nickname) {
-      return await this.userRepository.findOne({ where: { nickname } });
-    }
-    if(email) {
-      return await this.userRepository.findOne({ where: { email } });
-    }
+  async findByEmail(email: string) {
+    return await this.userRepository.findOne({ where: { email } });
+  }
 
-    return null;
+  async findByNickname(nickname: string) {
+    return await this.userRepository.findOne({ where: { nickname } });
   }
 
   async getAll() {

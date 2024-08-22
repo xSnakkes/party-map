@@ -1,4 +1,5 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import { AuthUser } from 'src/auth/model/auth_user.model';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -85,4 +86,15 @@ export class User extends Model<User, UserCreationAttrs> {
     defaultValue: OnlineStatus.OFFLINE,
   })
   online_status: OnlineStatus;
+
+  @ForeignKey(() => AuthUser)
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    unique: true,
+  })
+  auth_user_id: string;
+
+  @BelongsTo(() => AuthUser)
+  auth_user: AuthUser;
 }

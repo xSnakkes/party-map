@@ -7,10 +7,11 @@ import { AuthUser } from './model/auth_user.model';
 import { LocalStrategy } from '../strategies/local.strategy';
 import { UserModule } from 'src/user/user.module';
 import { User } from 'src/user/model/user.model';
+import { UserService } from 'src/user/user.service';
 
 @Module({
-  imports: [SequelizeModule.forFeature([AuthUser]), UserModule],
+  imports: [SequelizeModule.forFeature([AuthUser, User]), UserModule],
   controllers: [AuthController],
-  providers: [AuthService, LocalSerializer, LocalStrategy],
+  providers: [AuthService, UserService, LocalSerializer, LocalStrategy],
 })
 export class AuthModule {}

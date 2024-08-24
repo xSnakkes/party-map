@@ -10,7 +10,8 @@ import { useContainer } from 'class-validator';
 import session from 'express-session';
 import { SESSION_COOKIE_NAME } from './auth/constants';
 import { randomUUID } from 'crypto';
-import { User } from './user/model/user.model';
+import { createClient } from 'redis';
+import RedisStore from 'connect-redis';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -45,23 +46,35 @@ async function bootstrap() {
     }),
   );
 
+  const redisClient = createClient({
+    url: configService.get('REDIS_URL'),
+  });
+
+  await redisClient.connect();
+
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: '',
+  });
+
   app.use(
     session({
-      secret: configService.get('SESSION_SECRET') as string,
+      store: redisStore,
+      secret: configService.get<string>('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,
       name: SESSION_COOKIE_NAME,
       proxy: true,
       cookie: {
-        secure: NODE_ENV === 'production',
+        secure: configService.get<string>('NODE_ENV') === 'production',
         sameSite: 'none',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       },
       genid: (req) => {
         const id = randomUUID();
-        const userId = (req.user as User)?.id || 'anonymous';
+        const userId = (req.user as any)?.id || 'anonymous';
         return `sid:${userId}:${id}`;
-      }
+      },
     }),
   );
 

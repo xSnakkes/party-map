@@ -39,11 +39,20 @@ export class AuthService {
         { transaction: t },
       );
     } catch (error: any) {
-      if (error.name === 'SequelizeUniqueConstraintError' || error.name === PostgresErrorCode.UniqueError) {
+      if (
+        error.name === 'SequelizeUniqueConstraintError' ||
+        error.name === PostgresErrorCode.UniqueError
+      ) {
         throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
       }
-      this.logger.error(`Error creating auth user: ${error.message}`, error.stack);
-      throw new HttpException('Error creating user: ' + error.message, HttpStatus.BAD_REQUEST);
+      this.logger.error(
+        `Error creating auth user: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        'Error creating user: ' + error.message,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -52,7 +61,11 @@ export class AuthService {
 
     try {
       const user = await this.sequelize.transaction(async (transaction) => {
-        const authUser = await this.createAuth(signUpDTO.email, hashedPassword, transaction);
+        const authUser = await this.createAuth(
+          signUpDTO.email,
+          hashedPassword,
+          transaction,
+        );
         return this.userService.create({
           ...signUpDTO,
           auth_user_id: authUser.id,
@@ -62,7 +75,10 @@ export class AuthService {
       return user;
     } catch (error: any) {
       this.logger.error(`Error creating user: ${error.message}`, error.stack);
-      throw new HttpException('Error creating user: ' + error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Error creating user: ' + error.message,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -77,7 +93,10 @@ export class AuthService {
         await this.cacheManager.store.mdel(...filteredKeys);
       }
     } catch (error: any) {
-      this.logger.error(`Error revoking sessions: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error revoking sessions: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -92,22 +111,36 @@ export class AuthService {
         user = await this.userService.findByNickname(identifier);
       }
 
-      if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      if (!user)
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       const { auth_user } = user;
-      const passwordMatching = await this.verifyPassword(password, auth_user.password);
+      const passwordMatching = await this.verifyPassword(
+        password,
+        auth_user.password,
+      );
 
-      if (!passwordMatching) throw new UnauthorizedException('Wrong credentials provided.');
+      if (!passwordMatching)
+        throw new UnauthorizedException('Wrong credentials provided.');
 
       delete user.auth_user;
       return user;
     } catch (error: any) {
-      this.logger.error(`Error authenticating user: ${error.message}`, error.stack);
-      throw new HttpException('Wrong credentials provided.', HttpStatus.BAD_REQUEST);
+      this.logger.error(
+        `Error authenticating user: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        'Wrong credentials provided.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  private async verifyPassword(plainTextPassword: string, hashedPassword: string) {
+  private async verifyPassword(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ) {
     return bcrypt.compare(plainTextPassword, hashedPassword);
   }
 }

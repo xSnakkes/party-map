@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import pg from 'pg';
 import passport from 'passport';
 import { CacheModule } from '@nestjs/cache-manager';
+import { RedisOptions } from './common/configs/redis.config';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     AuthModule,
     UserModule,
 
-    CacheModule.registerAsync({}), // TODO add redis cache config
+    CacheModule.registerAsync(RedisOptions),
   ],
   controllers: [],
   providers: [],
@@ -54,4 +55,3 @@ export class AppModule implements NestModule {
     consumer.apply(passport.initialize(), passport.session()).forRoutes('*');
   }
 }
-

@@ -9,8 +9,6 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   HttpException,
-  UsePipes,
-  ValidationPipe,
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -57,7 +55,12 @@ export class AuthController {
       return new Promise((resolve, reject) =>
         passport.authenticate('local', {})(req, res, (error) => {
           if (error) {
-            reject(new HttpException('Authentication failed', HttpStatus.UNAUTHORIZED));
+            reject(
+              new HttpException(
+                'Authentication failed',
+                HttpStatus.UNAUTHORIZED,
+              ),
+            );
             return;
           }
 
@@ -66,7 +69,10 @@ export class AuthController {
         }),
       );
     } catch (error: any) {
-      throw new HttpException('Registration failed: ' + error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Registration failed: ' + error.message,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -84,7 +90,10 @@ export class AuthController {
       await this.authService.revokeActiveSessions(user.id, request.session.id);
       res.status(HttpStatus.OK).send(user);
     } catch (error: any) {
-      throw new HttpException('Login failed: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Login failed: ' + error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -95,7 +104,10 @@ export class AuthController {
     try {
       return await this.userService.findOne(request.user.id);
     } catch (error: any) {
-      throw new HttpException('Authentication failed: ' + error.message, HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        'Authentication failed: ' + error.message,
+        HttpStatus.FORBIDDEN,
+      );
     }
   }
 
@@ -108,7 +120,10 @@ export class AuthController {
         res.clearCookie(SESSION_COOKIE_NAME).sendStatus(HttpStatus.OK);
       });
     } catch (error: any) {
-      throw new HttpException('Logout failed: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Logout failed: ' + error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

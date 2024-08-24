@@ -1,2 +1,2 @@
-export * from "./cookie-auth.guard"
-export * from "./login-credentionals.guard"
+export * from './cookie-auth.guard';
+export * from './login-credentionals.guard';

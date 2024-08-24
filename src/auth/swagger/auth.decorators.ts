@@ -1,5 +1,14 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiBody, ApiCookieAuth, ApiOperation, ApiResponse, ApiOkResponse, ApiBadRequestResponse, ApiForbiddenResponse, ApiInternalServerErrorResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 import { SignInDTO, SignUpDTO } from '../dto';
 import { SESSION_COOKIE_NAME } from '../constants';
 import { AuthResponseExample } from './auth.examples';
@@ -20,7 +29,8 @@ export function ApiLogin() {
     }),
     ApiInternalServerErrorResponse({
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      description: 'An internal server error occurred during the login process.',
+      description:
+        'An internal server error occurred during the login process.',
     }),
   );
 }
@@ -37,11 +47,13 @@ export function ApiSignUp() {
     }),
     ApiBadRequestResponse({
       status: HttpStatus.BAD_REQUEST,
-      description: 'Sign up failed due to validation errors or the user already exists.',
+      description:
+        'Sign up failed due to validation errors or the user already exists.',
     }),
     ApiInternalServerErrorResponse({
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      description: 'An internal server error occurred during the sign-up process.',
+      description:
+        'An internal server error occurred during the sign-up process.',
     }),
   );
 }
@@ -61,11 +73,13 @@ export function ApiAuthenticate() {
     }),
     ApiForbiddenResponse({
       status: HttpStatus.FORBIDDEN,
-      description: 'The request is missing authentication credentials or the session is invalid.',
+      description:
+        'The request is missing authentication credentials or the session is invalid.',
     }),
     ApiInternalServerErrorResponse({
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      description: 'An internal server error occurred while retrieving user data.',
+      description:
+        'An internal server error occurred while retrieving user data.',
     }),
   );
 }

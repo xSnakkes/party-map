@@ -23,17 +23,12 @@ async function bootstrap() {
   const NODE_ENV = configService.get('NODE_ENV');
   const PORT = configService.get('PORT');
 
-  if (NODE_ENV !== 'production') {
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
-  }
-
   app.enableCors();
   app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '1.0',
+    defaultVersion: '1',
   });
   app.useGlobalPipes(
     new ValidationPipe({
@@ -81,6 +76,11 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  if (NODE_ENV !== 'production') {
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(PORT, () => {
     const logger = new Logger();

@@ -2,10 +2,9 @@ import { Column, DataType, Model, Table, HasOne } from 'sequelize-typescript';
 import { User } from 'src/user/model/user.model';
 
 interface AuthUserCreationAttribute {
+  nickname: string;
   email: string;
   password: string;
-  reset_password_email_at: Date;
-  reset_password_otp_at: Date;
 }
 
 @Table({ tableName: 'auth_user' })

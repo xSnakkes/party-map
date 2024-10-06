@@ -3,10 +3,12 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Model,
   Table,
 } from 'sequelize-typescript';
 import { AuthUser } from 'src/auth/model/auth_user.model';
+import { Key } from 'src/keys/models/keys.model';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -104,4 +106,7 @@ export class User extends Model<User, UserCreationAttrs> {
 
   @BelongsTo(() => AuthUser)
   auth_user: AuthUser;
+
+  @HasMany(() => Key)
+  keys: Key[];
 }

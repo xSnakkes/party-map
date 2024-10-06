@@ -26,8 +26,8 @@ import passport from 'passport';
 import { CookieAuthenticationGuard } from './guards/cookie-auth.guard';
 import { SESSION_COOKIE_NAME } from './constants';
 import { UserService } from 'src/user/user.service';
-import { CreateUserDTO } from 'src/user/dto/create-user.dto';
 import { SignInDTO } from './dto/login.dto';
+import { SignUpDTO } from './dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -42,15 +42,18 @@ export class AuthController {
   @Post('sign-up')
   async register(
     @Req() req: Request,
-    @Body() signUpDTO: CreateUserDTO,
+    @Body() signUpDTO: SignUpDTO,
     @Res() res: Response,
   ) {
+    console.log('signUpDTO', signUpDTO);
+
     try {
       const user = await this.authService.createUser(signUpDTO);
 
-      req.body.email = signUpDTO.email;
-      req.body.nickname = signUpDTO.nickname;
+      req.body.identifier = signUpDTO.email || signUpDTO.nickname;
       req.body.password = signUpDTO.password;
+
+      console.log('req.body', req.body);
 
       return new Promise((resolve, reject) =>
         passport.authenticate('local', {})(req, res, (error) => {
@@ -69,6 +72,7 @@ export class AuthController {
         }),
       );
     } catch (error: any) {
+      console.log('error', error);
       throw new HttpException(
         'Registration failed: ' + error.message,
         HttpStatus.BAD_REQUEST,

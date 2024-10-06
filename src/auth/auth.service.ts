@@ -29,22 +29,22 @@ export class AuthService {
     private sequelize: Sequelize,
   ) {}
 
-  async createAuth(email: string, password: string, t: Transaction) {
+  async createAuth(
+    email: string,
+    nickname: string,
+    password: string,
+    t: Transaction,
+  ) {
     try {
       return await this.authRepository.create(
         {
+          nickname,
           email,
           password,
         },
         { transaction: t },
       );
     } catch (error: any) {
-      if (
-        error.name === 'SequelizeUniqueConstraintError' ||
-        error.name === PostgresErrorCode.UniqueError
-      ) {
-        throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
-      }
       this.logger.error(
         `Error creating auth user: ${error.message}`,
         error.stack,
@@ -60,17 +60,21 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(signUpDTO.password, 10);
 
     try {
-      const user = await this.sequelize.transaction(async (transaction) => {
+      const user = await this.sequelize.transaction(async (t) => {
         const authUser = await this.createAuth(
           signUpDTO.email,
+          signUpDTO.nickname,
           hashedPassword,
-          transaction,
+          t,
         );
-        return this.userService.create({
-          ...signUpDTO,
-          auth_user_id: authUser.id,
-          password: hashedPassword,
-        });
+        return this.userService.create(
+          {
+            ...signUpDTO,
+            auth_user_id: authUser.id,
+            password: hashedPassword,
+          },
+          t,
+        );
       });
       return user;
     } catch (error: any) {
@@ -111,6 +115,8 @@ export class AuthService {
         user = await this.userService.findByNickname(identifier);
       }
 
+      this.logger.debug(`User found: ${JSON.stringify(user)}`);
+
       if (!user)
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
@@ -123,8 +129,11 @@ export class AuthService {
       if (!passwordMatching)
         throw new UnauthorizedException('Wrong credentials provided.');
 
-      delete user.auth_user;
-      return user;
+      const userObject = user.toJSON();
+      delete userObject.auth_user;
+
+      this.logger.debug(`User authenticated: ${JSON.stringify(userObject)}`);
+      return userObject;
     } catch (error: any) {
       this.logger.error(
         `Error authenticating user: ${error.message}`,

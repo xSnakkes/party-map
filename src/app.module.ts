@@ -9,12 +9,14 @@ import pg from 'pg';
 import passport from 'passport';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisOptions } from './common/configs/redis.config';
+import { Key } from './keys/models/keys.model';
+import { KeyModule } from './keys/keys.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.${process.env.NODE_ENV || 'dev'}.env`,
+      envFilePath: `.env`,
     }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
@@ -22,27 +24,32 @@ import { RedisOptions } from './common/configs/redis.config';
       useFactory: (configService: ConfigService) => ({
         dialect: 'postgres',
         dialectModule: pg,
-        host: configService.get('POSTGRES_HOST'),
-        port: Number(configService.get('POSTGRES_PORT')),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DATABASE'),
-        dialectOptions: {
-          ssl: {
-            require: true,
-            rejectUnauthorized: true,
-          },
-        },
+        host: configService.get('DB_HOST'),
+        port: Number(configService.get('DB_PORT')),
+        username: configService.get('DB_USER'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        dialectOptions:
+          configService.get('NODE_ENV') === 'production'
+            ? {
+                ssl: {
+                  require: true,
+                  rejectUnauthorized: true,
+                },
+              }
+            : {},
         define: {
           underscored: true,
           createdAt: 'created_at',
           updatedAt: 'updated_at',
         },
-        models: [User, AuthUser],
+        models: [User, AuthUser, Key],
       }),
     }),
     AuthModule,
     UserModule,
+
+    KeyModule,
 
     CacheModule.registerAsync(RedisOptions),
   ],
